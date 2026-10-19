@@ -1,0 +1,486 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart ATS | Resume Analyzer</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #f5f6fb;
+            color: #252442;
+        }
+
+        header {
+            background: white;
+            padding: 18px 5%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e9e8f1;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 21px;
+            font-weight: 700;
+        }
+
+        .logo {
+            background: #6254d9;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        header span {
+            color: #77748b;
+            font-size: 13px;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h1 {
+            margin-bottom: 8px;
+            font-size: 29px;
+        }
+
+        .welcome p {
+            color: #77748b;
+            margin-top: 0;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border: 1px solid #e9e8f1;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px #25244208;
+        }
+
+        .score-card {
+            text-align: center;
+        }
+
+        .score-card h3 {
+            margin-top: 0;
+        }
+
+        .score {
+            font-size: 54px;
+            font-weight: 750;
+            color: #6254d9;
+            margin: 18px 0 5px;
+        }
+
+        .muted {
+            color: #858198;
+            font-size: 14px;
+        }
+
+        .progress {
+            background: #eae8f7;
+            height: 9px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 18px 0;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #6254d9;
+            transition: width 0.4s ease;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .stat {
+            background: #f7f6fc;
+            padding: 15px 8px;
+            border-radius: 10px;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 25px;
+        }
+
+        .stat small {
+            color: #77748b;
+        }
+
+        .form-card h2,
+        .results h2 {
+            margin-top: 0;
+            font-size: 21px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin: 20px 0 9px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 14px;
+            background: #faf9ff;
+            border: 1px dashed #bcb5e7;
+            border-radius: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 165px;
+            resize: vertical;
+            padding: 14px;
+            border: 1px solid #dedce9;
+            border-radius: 10px;
+            font: inherit;
+            line-height: 1.6;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: 2px solid #c7c0ff;
+            border-color: #6254d9;
+        }
+
+        button {
+            width: 100%;
+            border: 0;
+            background: #6254d9;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #5042c2;
+        }
+
+        button:disabled {
+            opacity: 0.65;
+            cursor: wait;
+        }
+
+        .results {
+            margin-top: 22px;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+            margin: 15px 0 22px;
+        }
+
+        .skill {
+            background: #eeebff;
+            color: #5042b8;
+            border-radius: 8px;
+            padding: 8px 11px;
+            font-size: 13px;
+        }
+
+        .missing {
+            background: #fff0e7;
+            color: #a54d1e;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .message {
+            padding: 13px;
+            border-radius: 9px;
+            background: #f0efff;
+            color: #5042b8;
+            margin-top: 16px;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            background: #fff0f0;
+            color: #a32727;
+        }
+
+        footer {
+            text-align: center;
+            color: #858198;
+            font-size: 13px;
+            padding: 30px 15px;
+        }
+
+        @media (max-width: 720px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            main {
+                margin-top: 22px;
+            }
+
+            .welcome h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="brand">
+            <div class="logo">SA</div>
+            <div>
+                Smart ATS<br>
+                <span>Resume Analyzer</span>
+            </div>
+        </div>
+        <span>AI-powered career toolkit</span>
+    </header>
+
+    <main>
+        <section class="welcome">
+            <h1>Resume Analysis Dashboard</h1>
+            <p>Check how closely your resume matches a job description.</p>
+        </section>
+
+        <div class="layout">
+            <aside class="card score-card">
+                <h3>Your ATS Match Score</h3>
+                <div class="score" id="score">--%</div>
+                <div class="muted" id="scoreMessage">
+                    Upload your resume to begin
+                </div>
+
+                <div class="progress">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <p class="muted">
+                    Your score is based on detected keyword matches.
+                    It is an estimate, not an employer's official ATS score.
+                </p>
+
+                <div class="stats">
+                    <div class="stat">
+                        <strong id="matchedCount">0</strong>
+                        <small>Matched skills</small>
+                    </div>
+                    <div class="stat">
+                        <strong id="missingCount">0</strong>
+                        <small>Missing skills</small>
+                    </div>
+                </div>
+            </aside>
+
+            <section>
+                <div class="card form-card">
+                    <h2>Analyze Your Resume</h2>
+                    <p class="muted">
+                        Upload a PDF and paste the job description below.
+                    </p>
+
+                    <form id="analyzeForm">
+                        <label for="resume">Resume (PDF)</label>
+                        <input
+                            type="file"
+                            id="resume"
+                            name="resume"
+                            accept=".pdf,application/pdf"
+                            required
+                        >
+
+                        <label for="jobDescription">
+                            Job Description
+                        </label>
+                        <textarea
+                            id="jobDescription"
+                            name="job_description"
+                            placeholder="Paste the job description here..."
+                            required
+                        ></textarea>
+
+                        <button type="submit" id="analyzeButton">
+                            Analyze Resume
+                        </button>
+                    </form>
+
+                    <div id="message" class="message hidden"></div>
+                </div>
+
+                <div id="results" class="card results hidden">
+                    <h2>Analysis Results</h2>
+                    <p class="muted" id="resumeName"></p>
+
+                    <h3>Matched Skills</h3>
+                    <div id="matchedSkills" class="skill-list"></div>
+
+                    <h3>Missing Skills</h3>
+                    <div id="missingSkills" class="skill-list"></div>
+
+                    <h3>Skills Detected in Resume</h3>
+                    <div id="resumeSkills" class="skill-list"></div>
+
+                    <h3>Skills Detected in Job Description</h3>
+                    <div id="jobSkills" class="skill-list"></div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        Smart ATS Resume Analyzer · Built with FastAPI and Python
+    </footer>
+
+    <script>
+        const form = document.getElementById("analyzeForm");
+        const button = document.getElementById("analyzeButton");
+        const message = document.getElementById("message");
+        const results = document.getElementById("results");
+
+        function showSkills(elementId, skills, missing = false) {
+            const container = document.getElementById(elementId);
+            container.replaceChildren();
+
+            if (!skills || skills.length === 0) {
+                const empty = document.createElement("span");
+                empty.className = "muted";
+                empty.textContent = "No skills detected.";
+                container.appendChild(empty);
+                return;
+            }
+
+            skills.forEach(skill => {
+                const tag = document.createElement("span");
+                tag.className = missing
+                    ? "skill missing"
+                    : "skill";
+                tag.textContent = skill;
+                container.appendChild(tag);
+            });
+        }
+
+        form.addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const resume = document.getElementById("resume").files[0];
+            const jobDescription =
+                document.getElementById("jobDescription").value.trim();
+
+            if (!resume || !jobDescription) {
+                return;
+            }
+
+            if (!resume.name.toLowerCase().endsWith(".pdf")) {
+                message.textContent = "Please choose a PDF resume.";
+                message.className = "message error";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("resume", resume);
+            formData.append("job_description", jobDescription);
+
+            button.disabled = true;
+            button.textContent = "Analyzing...";
+            message.className = "message";
+            message.textContent = "Analyzing your resume. Please wait.";
+            results.classList.add("hidden");
+
+            try {
+                const response = await fetch("/analyze", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const detail = Array.isArray(data.detail)
+                        ? data.detail.map(item => item.msg).join(", ")
+                        : data.detail;
+
+                    throw new Error(
+                        detail || "Could not analyze the resume."
+                    );
+                }
+
+                const score = Number(data.ats_score) || 0;
+
+                document.getElementById("score").textContent =
+                    score + "%";
+                document.getElementById("progressFill").style.width =
+                    Math.max(0, Math.min(100, score)) + "%";
+
+                document.getElementById("scoreMessage").textContent =
+                    "Keyword match estimate";
+
+                document.getElementById("matchedCount").textContent =
+                    data.matched_skills.length;
+                document.getElementById("missingCount").textContent =
+                    data.missing_skills.length;
+
+                document.getElementById("resumeName").textContent =
+                    "Resume: " + data.resume_filename;
+
+                showSkills("matchedSkills", data.matched_skills);
+                showSkills("missingSkills", data.missing_skills, true);
+                showSkills("resumeSkills", data.resume_skills);
+                showSkills("jobSkills", data.job_description_skills);
+
+                results.classList.remove("hidden");
+                message.className = "message";
+                message.textContent = "Analysis completed successfully.";
+
+                results.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+            } catch (error) {
+                message.className = "message error";
+                message.textContent = "Analysis failed: " + error.message;
+            } finally {
+                button.disabled = false;
+                button.textContent = "Analyze Resume";
+            }
+        });
+    </script>
+</body>
+</html>
